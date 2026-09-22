@@ -1,189 +1,65 @@
-<script>
-        // DATOS SIMULADOS DEL ARCHIVO EXTERNO "productos.json"
-        // Para subir a GitHub, puedes guardar este bloque JSON en un archivo llamado "productos.json" en la raíz de tu repositorio.
-        const mockProductosJsonData = {
-            "configuracion": {
-                "nombreNegocio": "Cafetería & Repostería Artisanal",
-                "tagline": "Sabor casero directo hasta tu puerta",
-                "whatsappNotificaciones": "+5214421234567",
-                "moneda": "$",
-                "simboloMoneda": "MXN",
-                "caducidadHtml": "2027-12-31", // Fecha límite de vigencia del sitio (Formato YYYY-MM-DD)
-                "metodosPago": {
-                    "efectivoWhatsApp": true,
-                    "tarjetaStripe": true,
-                    "stripePublicKey": "pk_test_TYooMQauvdEDq54NiTphI7jx" // Llave pública de prueba Stripe
-                },
-                "entregaDomicilio": {
-                    "activado": true,
-                    "costoEnvio": 45.00
-                },
-                "anuncioSuperior": "🚀 Envío gratis en tu primer pedido usando el código BIENVENIDA"
-            },
-            "categorias": [
-                {
-                    "id": "promociones",
-                    "nombre": "PROMOCIONES",
-                    "productos": [
-                        {
-                            "id": "p1",
-                            "nombre": "Combo Desayuno Completo",
-                            "descripcion": "Incluye café americano, jugo natural de temporada y pan artesanal de la casa.",
-                            "precio": 120.00,
-                            "imagen": "https://placehold.co/400x300/4f46e5/ffffff?text=Combo+Desayuno"
-                        },
-                        {
-                            "id": "p2",
-                            "nombre": "Pack 3 Donas Glaseadas",
-                            "descripcion": "Deliciosas donas cubiertas de chocolate, fresa y vainilla con chispas de colores.",
-                            "precio": 75.00,
-                            "imagen": "https://placehold.co/400x300/ec4899/ffffff?text=Pack+Donas"
-                        },
-                        {
-                            "id": "p3",
-                            "nombre": "Sándwich Gourmet + Bebida",
-                            "descripcion": "Pan artesanal de masa madre con jamón serrano, queso provolone y té helado.",
-                            "precio": 145.00,
-                            "imagen": "https://placehold.co/400x300/10b981/ffffff?text=Sandwich+Gourmet"
-                        },
-                        {
-                            "id": "p4",
-                            "nombre": "Dúo Frappé Especial",
-                            "descripcion": "Dos frappés grandes de moka o caramel con crema batida y topping de caramelo.",
-                            "precio": 95.00,
-                            "imagen": "https://placehold.co/400x300/f59e0b/ffffff?text=Duo+Frappe"
-                        },
-                        {
-                            "id": "p5",
-                            "nombre": "Caja Degustación Mini-Postres",
-                            "descripcion": "Selección de 5 reposterías miniatura variadas ideales para compartir.",
-                            "precio": 180.00,
-                            "imagen": "https://placehold.co/400x300/8b5cf6/ffffff?text=Mini+Postres"
-                        }
-                    ]
-                },
-                {
-                    "id": "categoria_1",
-                    "nombre": "Categoría 1",
-                    "productos": [
-                        {
-                            "id": "c1_1",
-                            "nombre": "Café Americano de Grano",
-                            "descripcion": "Café de altura 100% mexicano tostado medio, preparado al momento.",
-                            "precio": 40.00,
-                            "imagen": "https://placehold.co/400x300/3b82f6/ffffff?text=Cafe+Americano"
-                        },
-                        {
-                            "id": "c1_2",
-                            "nombre": "Capuchino con Arte Latte",
-                            "descripcion": "Espresso intenso con leche texturizada cremosa y toque de canela.",
-                            "precio": 55.00,
-                            "imagen": "https://placehold.co/400x300/6366f1/ffffff?text=Capuchino"
-                        },
-                        {
-                            "id": "c1_3",
-                            "nombre": "Latte Vainilla Francesa",
-                            "descripcion": "Deliciosa combinación de espresso, leche vaporizada y jarabe de vainilla.",
-                            "precio": 65.00,
-                            "imagen": "https://placehold.co/400x300/14b8a6/ffffff?text=Latte+Vainilla"
-                        },
-                        {
-                            "id": "c1_4",
-                            "nombre": "Mocha Caliente Cremoso",
-                            "descripcion": "Chocolate amargo fundido con espresso y leche espumosa.",
-                            "precio": 70.00,
-                            "imagen": "https://placehold.co/400x300/84cc16/ffffff?text=Mocha"
-                        },
-                        {
-                            "id": "c1_5",
-                            "nombre": "Chocolatada Tradicional",
-                            "descripcion": "Chocolate caliente preparado con receta artesanal mexicana.",
-                            "precio": 50.00,
-                            "imagen": "https://placehold.co/400x300/eab308/ffffff?text=Chocolatada"
-                        }
-                    ]
-                },
-                {
-                    "id": "categoria_2",
-                    "nombre": "Categoría 2",
-                    "productos": [
-                        {
-                            "id": "c2_1",
-                            "nombre": "Croissant de Mantequilla",
-                            "descripcion": "Hojaldre horneado crujiente por fuera y suave por dentro.",
-                            "precio": 45.00,
-                            "imagen": "https://placehold.co/400x300/f97316/ffffff?text=Croissant"
-                        },
-                        {
-                            "id": "c2_2",
-                            "nombre": "Muffin de Arándanos",
-                            "descripcion": "Esponjoso pastelillo relleno y coronado con arándanos frescos.",
-                            "precio": 42.00,
-                            "imagen": "https://placehold.co/400x300/ef4444/ffffff?text=Muffin"
-                        },
-                        {
-                            "id": "c2_3",
-                            "nombre": "Panqué de Nuez Casero",
-                            "descripcion": "Rebanada gruesa de panqué húmedo con trozos de nuez pecana.",
-                            "precio": 40.00,
-                            "imagen": "https://placehold.co/400x300/a855f7/ffffff?text=Panque+Nuez"
-                        },
-                        {
-                            "id": "c2_4",
-                            "nombre": "Rol de Canela Glaseado",
-                            "descripcion": "Esponjoso rol horneado con pasta de canela y glaseado dulce.",
-                            "precio": 55.00,
-                            "imagen": "https://placehold.co/400x300/06b6d4/ffffff?text=Rol+Canela"
-                        },
-                        {
-                            "id": "c2_5",
-                            "nombre": "Galleta con Chispas de Chocolate",
-                            "descripcion": "Galleta estilo americano grande con generosas chispas de cacao.",
-                            "precio": 35.00,
-                            "imagen": "https://placehold.co/400x300/374151/ffffff?text=Galleta"
-                        }
-                    ]
-                },
-                {
-                    "id": "categoria_3",
-                    "nombre": "Categoría 3",
-                    "productos": [
-                        {
-                            "id": "c3_1",
-                            "nombre": "Jugo Verde Detox",
-                            "descripcion": "Espinaca, piña, apio, pepino y toque de jengibre fresco.",
-                            "precio": 60.00,
-                            "imagen": "https://placehold.co/400x300/22c55e/ffffff?text=Jugo+Verde"
-                        },
-                        {
-                            "id": "c3_2",
-                            "nombre": "Smoothie de Fresa y Plátano",
-                            "descripcion": "Frutas naturales licuadas con yogurt griego y toque de miel.",
-                            "precio": 65.00,
-                            "imagen": "https://placehold.co/400x300/ec4899/ffffff?text=Smoothie"
-                        },
-                        {
-                            "id": "c3_3",
-                            "nombre": "Té Chai Latte Frío",
-                            "descripcion": "Mezcla de especias chai con leche fría y hielo frappé.",
-                            "precio": 60.00,
-                            "imagen": "https://placehold.co/400x300/d97706/ffffff?text=Chai+Latte"
-                        },
-                        {
-                            "id": "c3_4",
-                            "nombre": "Agua de Horchata Artesanal",
-                            "descripcion": "Bebida tradicional de arroz con canela y notas de vainilla.",
-                            "precio": 35.00,
-                            "imagen": "https://placehold.co/400x300/64748b/ffffff?text=Horchata"
-                        },
-                        {
-                            "id": "c3_5",
-                            "nombre": "Tisana frutal de Frutos Rojos",
-                            "descripcion": "Infusión natural caliente o fría con trozos deshidratados de bayas.",
-                            "precio": 48.00,
-                            "imagen": "https://placehold.co/400x300/dc2626/ffffff?text=Tisana"
-                        }
-                    ]
-                }
+{
+    "configuracion": {
+        "nombreNegocio": "Nombre del Negocio",
+        "tagline": "Slogan o descripción corta",
+        "whatsappNotificaciones": "521XXXXXXXXXX",
+        "moneda": "$",
+        "caducidadHtml": "2027-12-31",
+        "metodosPago": {
+            "efectivoWhatsApp": true,
+            "tarjetaStripe": true,
+            "stripePublicKey": "pk_test_TU_LLAVE_DE_STRIPE"
+        },
+        "entregaDomicilio": {
+            "activado": true,
+            "costoEnvio": 50.00
+        },
+        "anuncioSuperior": "🚚 ¡Envíos disponibles toda la semana!"
+    },
+    "categorias": [
+        {
+            "id": "promociones",
+            "nombre": "PROMOCIONES",
+            "productos": [
+                { "id": "p1", "nombre": "Producto 1", "descripcion": "Descripción del producto...", "precio": 100.00, "imagen": "URL_DE_FOTO" },
+                { "id": "p2", "nombre": "Producto 2", "descripcion": "Descripción...", "precio": 150.00, "imagen": "URL_DE_FOTO" },
+                { "id": "p3", "nombre": "Producto 3", "descripcion": "Descripción...", "precio": 200.00, "imagen": "URL_DE_FOTO" },
+                { "id": "p4", "nombre": "Producto 4", "descripcion": "Descripción...", "precio": 250.00, "imagen": "URL_DE_FOTO" },
+                { "id": "p5", "nombre": "Producto 5", "descripcion": "Descripción...", "precio": 300.00, "imagen": "URL_DE_FOTO" }
             ]
-        };
+        },
+        {
+            "id": "cat1",
+            "nombre": "Categoria 1",
+            "productos": [
+                { "id": "c1_1", "nombre": "Producto 1", "descripcion": "Descripción...", "precio": 50.00, "imagen": "URL_DE_FOTO" },
+                { "id": "c1_2", "nombre": "Producto 2", "descripcion": "Descripción...", "precio": 60.00, "imagen": "URL_DE_FOTO" },
+                { "id": "c1_3", "nombre": "Producto 3", "descripcion": "Descripción...", "precio": 70.00, "imagen": "URL_DE_FOTO" },
+                { "id": "c1_4", "nombre": "Producto 4", "descripcion": "Descripción...", "precio": 80.00, "imagen": "URL_DE_FOTO" },
+                { "id": "c1_5", "nombre": "Producto 5", "descripcion": "Descripción...", "precio": 90.00, "imagen": "URL_DE_FOTO" }
+            ]
+        },
+        {
+            "id": "cat2",
+            "nombre": "Categoria 2",
+            "productos": [
+                { "id": "c2_1", "nombre": "Producto 1", "descripcion": "Descripción...", "precio": 50.00, "imagen": "URL_DE_FOTO" },
+                { "id": "c2_2", "nombre": "Producto 2", "descripcion": "Descripción...", "precio": 60.00, "imagen": "URL_DE_FOTO" },
+                { "id": "c2_3", "nombre": "Producto 3", "descripcion": "Descripción...", "precio": 70.00, "imagen": "URL_DE_FOTO" },
+                { "id": "c2_4", "nombre": "Producto 4", "descripcion": "Descripción...", "precio": 80.00, "imagen": "URL_DE_FOTO" },
+                { "id": "c2_5", "nombre": "Producto 5", "descripcion": "Descripción...", "precio": 90.00, "imagen": "URL_DE_FOTO" }
+            ]
+        },
+        {
+            "id": "cat3",
+            "nombre": "Categoria 3",
+            "productos": [
+                { "id": "c3_1", "nombre": "Producto 1", "descripcion": "Descripción...", "precio": 50.00, "imagen": "URL_DE_FOTO" },
+                { "id": "c3_2", "nombre": "Producto 2", "descripcion": "Descripción...", "precio": 60.00, "imagen": "URL_DE_FOTO" },
+                { "id": "c3_3", "nombre": "Producto 3", "descripcion": "Descripción...", "precio": 70.00, "imagen": "URL_DE_FOTO" },
+                { "id": "c3_4", "nombre": "Producto 4", "descripcion": "Descripción...", "precio": 80.00, "imagen": "URL_DE_FOTO" },
+                { "id": "c3_5", "nombre": "Producto 5", "descripcion": "Descripción...", "precio": 90.00, "imagen": "URL_DE_FOTO" }
+            ]
+        }
+    ]
+}
