@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo Digital</title>
+    <!-- Tailwind CSS para diseño moderno y limpio -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Stripe JS para pasarela de pagos real -->
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans antialiased pb-24">
+
+    <!-- BARRA DE ANUNCIO / PROMOCIÓN SUPERIOR -->
+    <div id="banner-superior" class="bg-indigo-600 text-white text-xs sm:text-sm text-center py-2 px-4 font-medium hidden">
+    </div>
+
+    <!-- ENCABEZADO -->
+    <header class="bg-white shadow-sm sticky top-0 z-30">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div>
+                <h1 id="store-title" class="text-xl sm:text-2xl font-bold text-gray-900">Cargando negocio...</h1>
+                <p id="store-tagline" class="text-xs sm:text-sm text-gray-500"></p>
+            </div>
+            <!-- Botón del Carrito Flotante superior -->
+            <button onclick="toggleCartModal()" class="relative bg-indigo-50 hover:bg-indigo-100 text-indigo-600 px-4 py-2 rounded-full font-semibold flex items-center gap-2 transition">
+                <i class="fa-solid fa-shopping-cart text-lg"></i>
+                <span class="hidden sm:inline">Carrito</span>
+                <span id="cart-counter" class="bg-indigo-600 text-white text-xs rounded-full px-2 py-0.5 font-bold">0</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="max-w-4xl mx-auto px-4 mt-6">
+
+        <!-- NAVEGACIÓN DE CATEGORÍAS (PROMOCIONES, Categoria 1, Categoria 2, Categoria 3) -->
+        <div id="categories-tabs" class="flex overflow-x-auto gap-2 pb-2 mb-6 scrollbar-none border-b border-gray-200">
+            <!-- Generado dinámicamente -->
+        </div>
+
+        <!-- CONTENEDOR DE PRODUCTOS -->
+        <section>
+            <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Generado dinámicamente -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- CARRITO MODAL / PANEL INFERIOR -->
+    <div id="cart-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex justify-end">
+        <div class="bg-white w-full max-w-md h-full flex flex-col shadow-xl transform transition-transform">
+            <!-- Cabecera del Carrito -->
+            <div class="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                <h2 class="text-lg font-bold text-gray-900"><i class="fa-solid fa-bag-shopping mr-2 text-indigo-600"></i>Tu Carrito</h2>
+                <button onclick="toggleCartModal()" class="text-gray-400 hover:text-gray-600 text-xl font-bold px-2">&times;</button>
+            </div>
+
+            <!-- Lista de items en el carrito -->
+            <div id="cart-items-container" class="flex-1 overflow-y-auto p-4 space-y-4 divide-y divide-gray-100">
+                <!-- Items dinámicos -->
+            </div>
+
+            <!-- Opciones de Entrega (Activado/Desactivado desde JSON) -->
+            <div id="delivery-section" class="p-4 bg-gray-50 border-t border-gray-200 hidden">
+                <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Método de entrega:</label>
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="button" id="btn-pickup" onclick="setDeliveryMode('pickup')" class="py-2 text-xs font-semibold rounded-lg border text-center transition bg-indigo-600 text-white border-indigo-600">
+                        Passar a recoger (Gratis)
+                    </button>
+                    <button type="button" id="btn-delivery" onclick="setDeliveryMode('delivery')" class="py-2 text-xs font-semibold rounded-lg border text-center transition bg-white text-gray-700 border-gray-300">
+                        Envío a domicilio (<span id="delivery-cost-label">$0</span>)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Totales y Pago -->
+            <div class="p-4 border-t border-gray-200 bg-white space-y-2">
+                <div class="flex justify-between text-sm text-gray-600">
+                    <span>Subtotal:</span>
+                    <span id="cart-subtotal">$0.00</span>
+                </div>
+                <div id="delivery-fee-row" class="flex justify-between text-sm text-gray-600 hidden">
+                    <span>Envío:</span>
+                    <span id="cart-delivery-fee">$0.00</span>
+                </div>
+                <div class="flex justify-between text-lg font-bold text-gray-900 pt-2 border-t border-gray-100">
+                    <span>Total:</span>
+                    <span id="cart-total">$0.00</span>
+                </div>
+
+                <!-- Botones de Pago (Controlados manual desde JSON) -->
+                <div class="pt-3 space-y-2">
+                    <button id="btn-checkout-whatsapp" onclick="checkoutWhatsApp()" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-sm transition hidden">
+                        <i class="fa-brands fa-whatsapp text-xl"></i> Pedir por WhatsApp (Efectivo)
+                    </button>
+                    <button id="btn-checkout-stripe" onclick="checkoutStripe()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-sm transition hidden">
+                        <i class="fa-solid fa-credit-card text-lg"></i> Pagar con Tarjeta (Stripe)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT DE LÓGICA -->
+    <script>
+        // Estado global
+        let storeConfig = {};
+        let categoriesData = [];
+        let currentCategoryIndex = 0;
+        let cart = [];
+        let deliveryMode = 'pickup'; // 'pickup' o 'delivery'
+        let productQuantities = {}; // Control temporal de cantidad por producto antes de agregar
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadCatalogData();
+        });
+
+        // Carga el archivo externo productos.json
+        async function loadCatalogData() {
+            try {
+                const response = await fetch('productos.json');
+                if (!response.ok) throw new Error('No se encontró el archivo productos.json');
+                const data = await response.json();
+                
+                storeConfig = data.configuracion;
+                categoriesData = data.categorias;
+
+                // Validar caducidad del sitio por mantenimiento
+                checkSiteExpiration(storeConfig.caducidadHtml);
+
+                // Inicializar visualización
+                initStore();
+            } catch (error) {
+                console.error(error);
+                document.body.innerHTML = `
+                    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; font-family:sans-serif; text-align:center; padding:20px;">
+                        <h2 style="color:#e11d48; font-size:24px; font-weight:bold; margin-bottom:10px;">⚠️ Sitio en Mantenimiento o Archivo faltante</h2>
+                        <p style="color:#4b5563; max-width:450px;">Asegúrate de subir el archivo <b>productos.json</b> a la raíz de tu repositorio en GitHub junto con este archivo HTML.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Validador de caducidad del sitio web
+        function checkSiteExpiration(expirationDateStr) {
+            if (!expirationDateStr) return;
+            const today = new Date();
+            const expirationDate = new Date(expirationDateStr + 'T23:59:59');
+
+            if (today > expirationDate) {
+                document.body.innerHTML = `
+                    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; font-family:sans-serif; text-align:center; padding:20px; background:#fef2f2;">
+                        <div style="background:white; padding:40px; border-radius:16px; box-shadow:0 10px 25px rgba(0,0,0,0.05); max-width:480px;">
+                            <i class="fa-solid fa-triangle-exclamation" style="font-size:48px; color:#dc2626; margin-bottom:16px;"></i>
+                            <h2 style="color:#991b1b; font-size:22px; font-weight:bold; margin-bottom:10px;">Sitio Temporalmente Suspendido</h2>
+                            <p style="color:#4b5563; font-size:14px; line-height:1.5;">Este servicio web ha expirado. Si eres el propietario de este negocio, por favor comunícate con tu proveedor de soporte técnico para renovar tu mantenimiento mensual.</p>
+                        </div>
+                    </div>
+                `;
+                throw new Error('Sitio caducado');
+            }
+        }
+
+        function initStore() {
+            // Textos del negocio
+            document.getElementById('store-title').innerText = storeConfig.nombreNegocio || 'Mi Negocio';
+            document.getElementById('store-tagline').innerText = storeConfig.tagline || '';
+            document.title = storeConfig.nombreNegocio || 'Catálogo Digital';
+
+            // Anuncio superior opcional
+            if (storeConfig.anuncioSuperior) {
+                const banner = document.getElementById('banner-superior');
+                banner.innerText = storeConfig.anuncioSuperior;
+                banner.classList.remove('hidden');
+            }
+
+            // Configurar métodos de pago en el carrito
+            if (storeConfig.metodosPago?.efectivoWhatsApp) {
+                document.getElementById('btn-checkout-whatsapp').classList.remove('hidden');
+            }
+            if (storeConfig.metodosPago?.tarjetaStripe) {
+                document.getElementById('btn-checkout-stripe').classList.remove('hidden');
+            }
+
+            // Configurar sección de entrega a domicilio
+            if (storeConfig.entregaDomicilio?.activado) {
+                document.getElementById('delivery-section').classList.remove('hidden');
+                document.getElementById('delivery-cost-label').innerText = `${storeConfig.moneda || '$'}${storeConfig.entregaDomicilio.costoEnvio.toFixed(2)}`;
+            }
+
+            renderTabs();
+            renderProducts();
+        }
+
+        // Renderizar botones de categorías (PROMOCIONES, Categoria 1, etc.)
+        function renderTabs() {
+            const tabsContainer = document.getElementById('categories-tabs');
+            tabsContainer.innerHTML = '';
+
+            categoriesData.forEach((cat, index) => {
+                const isActive = index === currentCategoryIndex;
+                const btn = document.createElement('button');
+                btn.className = `px-5 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition shadow-sm ${
+                    isActive 
+                    ? 'bg-indigo-600 text-white shadow-indigo-100' 
+                    : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+                }`;
+                btn.innerText = cat.nombre;
+                btn.onclick = () => {
+                    currentCategoryIndex = index;
+                    renderTabs();
+                    renderProducts();
+                };
+                tabsContainer.appendChild(btn);
+            });
+        }
+
+        // Renderizar productos de la categoría seleccionada con selector de cantidad (+ y -)
+        function renderProducts() {
+            const grid = document.getElementById('products-grid');
+            grid.innerHTML = '';
+
+            const currentCategory = categoriesData[currentCategoryIndex];
+            if (!currentCategory || !currentCategory.productos) return;
+
+            currentCategory.productos.forEach(prod => {
+                // Inicializar contador local en 1 si no existe
+                if (productQuantities[prod.id] === undefined) {
+                    productQuantities[prod.id] = 1;
+                }
+                const qty = productQuantities[prod.id];
+
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-md transition';
+                card.innerHTML = `
+                    <div>
+                        <div class="h-48 overflow-hidden bg-gray-100 relative">
+                            <img src="${prod.imagen}" alt="${prod.nombre}" class="w-full h-full object-cover">
+                        </div>
+                        <div class="p-4">
+                            <h3 class="font-bold text-gray-900 text-base mb-1">${prod.nombre}</h3>
+                            <p class="text-xs text-gray-500 line-clamp-2 mb-3">${prod.descripcion}</p>
+                            <span class="text-lg font-extrabold text-indigo-600">${storeConfig.moneda || '$'}${prod.precio.toFixed(2)}</span>
+                        </div>
+                    </div>
+                    <div class="p-4 pt-0 flex items-center justify-between gap-2">
+                        <!-- Selector de cantidad en tarjeta -->
+                        <div class="flex items-center border border-gray-200 rounded-lg bg-gray-50">
+                            <button onclick="updateCardQty('${prod.id}', -1)" class="px-2.5 py-1 text-gray-600 hover:bg-gray-200 font-bold text-sm rounded-l-lg">-</button>
+                            <span id="qty-val-${prod.id}" class="px-3 text-sm font-bold text-gray-800">${qty}</span>
+                            <button onclick="updateCardQty('${prod.id}', 1)" class="px-2.5 py-1 text-gray-600 hover:bg-gray-200 font-bold text-sm rounded-r-lg">+</button>
+                        </div>
+                        <!-- Botón Agregar -->
+                        <button onclick="addProductToCart('${prod.id}', '${prod.nombre}', ${prod.precio}, '${prod.imagen}')" class="flex-1 bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white text-xs font-bold py-2 px-3 rounded-lg transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-cart-plus"></i> Agregar
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Modificar cantidad numérica en la tarjeta de producto
+        function updateCardQty(productId, change) {
+            if (productQuantities[productId] === undefined) {
+                productQuantities[productId] = 1;
+            }
+            productQuantities[productId] += change;
+            if (productQuantities[productId] < 1) {
+                productQuantities[productId] = 1;
+            }
+            const label = document.getElementById(`qty-val-${productId}`);
+            if (label) {
+                label.innerText = productQuantities[productId];
+            }
+        }
+
+        // Agregar producto al carrito usando la cantidad seleccionada
+        function addProductToCart(id, nombre, precio, imagen) {
+            const quantityToAdd = productQuantities[id] || 1;
+            const existing = cart.find(item => item.id === id);
+
+            if (existing) {
+                existing.quantity += quantityToAdd;
+            } else {
+                cart.push({ id, nombre, precio, imagen, quantity: quantityToAdd });
+            }
+
+            // Reiniciar contador de tarjeta a 1
+            productQuantities[id] = 1;
+            const label = document.getElementById(`qty-val-${id}`);
+            if (label) label.innerText = 1;
+
+            updateCartUI();
+            toggleCartModal(true); // Abrir carrito para confirmar
+        }
+
+        function toggleCartModal(forceOpen = false) {
+            const modal = document.getElementById('cart-modal');
+            if (forceOpen) {
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.toggle('hidden');
+            }
+        }
+
+        // Cambiar cantidad dentro del carrito
+        function changeCartItemQty(id, change) {
+            const item = cart.find(i => i.id === id);
+            if (item) {
+                item.quantity += change;
+                if (item.quantity <= 0) {
+                    cart = cart.filter(i => i.id !== id);
+                }
+            }
+            updateCartUI();
+        }
+
+        function setDeliveryMode(mode) {
+            deliveryMode = mode;
+            const btnPickup = document.getElementById('btn-pickup');
+            const btnDelivery = document.getElementById('btn-delivery');
+            const feeRow = document.getElementById('delivery-fee-row');
+
+            if (mode === 'pickup') {
+                btnPickup.className = "py-2 text-xs font-semibold rounded-lg border text-center transition bg-indigo-600 text-white border-indigo-600";
+                btnDelivery.className = "py-2 text-xs font-semibold rounded-lg border text-center transition bg-white text-gray-700 border-gray-300";
+                feeRow.classList.add('hidden');
+            } else {
+                btnDelivery.className = "py-2 text-xs font-semibold rounded-lg border text-center transition bg-indigo-600 text-white border-indigo-600";
+                btnPickup.className = "py-2 text-xs font-semibold rounded-lg border text-center transition bg-white text-gray-700 border-gray-300";
+                feeRow.classList.remove('hidden');
+            }
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const counter = document.getElementById('cart-counter');
+            const container = document.getElementById('cart-items-container');
+            
+            const totalItems = cart.reduce((sum, i) => sum + i.quantity, 0);
+            counter.innerText = totalItems;
+
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 text-gray-400">
+                        <i class="fa-solid fa-basket-shopping text-4xl mb-2"></i>
+                        <p class="text-sm">Tu carrito está vacío</p>
+                    </div>
+                `;
+                document.getElementById('cart-subtotal').innerText = `${storeConfig.moneda || '$'}0.00`;
+                document.getElementById('cart-total').innerText = `${storeConfig.moneda || '$'}0.00`;
+                return;
+            }
+
+            container.innerHTML = '';
+            let subtotal = 0;
+
+            cart.forEach(item => {
+                subtotal += item.precio * item.quantity;
+                const div = document.createElement('div');
+                div.className = 'py-3 flex items-center justify-between gap-3';
+                div.innerHTML = `
+                    <img src="${item.imagen}" class="w-12 h-12 object-cover rounded-lg border">
+                    <div class="flex-1">
+                        <h4 class="text-xs font-bold text-gray-900">${item.nombre}</h4>
+                        <span class="text-xs text-indigo-600 font-bold">${storeConfig.moneda || '$'}${item.precio.toFixed(2)}</span>
+                    </div>
+                    <div class="flex items-center border border-gray-200 rounded-md bg-gray-50">
+                        <button onclick="changeCartItemQty('${item.id}', -1)" class="px-2 py-0.5 text-xs font-bold text-gray-600 hover:bg-gray-200">-</button>
+                        <span class="px-2 text-xs font-bold text-gray-800">${item.quantity}</span>
+                        <button onclick="changeCartItemQty('${item.id}', 1)" class="px-2 py-0.5 text-xs font-bold text-gray-600 hover:bg-gray-200">+</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+            let deliveryFee = 0;
+            if (deliveryMode === 'delivery' && storeConfig.entregaDomicilio?.activado) {
+                deliveryFee = storeConfig.entregaDomicilio.costoEnvio || 0;
+                document.getElementById('cart-delivery-fee').innerText = `${storeConfig.moneda || '$'}${deliveryFee.toFixed(2)}`;
+            }
+
+            const total = subtotal + deliveryFee;
+
+            document.getElementById('cart-subtotal').innerText = `${storeConfig.moneda || '$'}${subtotal.toFixed(2)}`;
+            document.getElementById('cart-total').innerText = `${storeConfig.moneda || '$'}${total.toFixed(2)}`;
+        }
+
+        // Pago en efectivo vía WhatsApp
+        function checkoutWhatsApp() {
+            if (cart.length === 0) return;
+
+            let message = `Hola, quiero hacer el siguiente pedido:\n\n`;
+            cart.forEach(item => {
+                message += `- ${item.quantity}x ${item.nombre} ($${(item.precio * item.quantity).toFixed(2)})\n`;
+            });
+
+            let subtotal = cart.reduce((sum, i) => sum + (i.precio * i.quantity), 0);
+            let deliveryFee = (deliveryMode === 'delivery' && storeConfig.entregaDomicilio?.activado) ? storeConfig.entregaDomicilio.costoEnvio : 0;
+            let total = subtotal + deliveryFee;
+
+            message += `\nTipo de entrega: ${deliveryMode === 'delivery' ? 'Domicilio (+$' + deliveryFee + ')' : 'Pasar a recoger'}`;
+            message += `\n*Total a pagar: $${total.toFixed(2)}*`;
+
+            const phone = storeConfig.whatsappNotificaciones || '';
+            const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+            window.open(url, '_blank');
+        }
+
+        // Pago con tarjeta vía Stripe (Simulado con llave pública)
+        async function checkoutStripe() {
+            if (cart.length === 0) return;
+            const publicKey = storeConfig.metodosPago?.stripePublicKey;
+            if (!publicKey) {
+                alert('La pasarela de pagos con tarjeta no está configurada correctamente.');
+                return;
+            }
+
+            try {
+                const stripe = Stripe(publicKey);
+                // NOTA: Para una integración de producción completa con Stripe se requiere un Backend (Node.js/PHP). 
+                // Aquí simulamos el flujo de redirección o integración de checkout.
+                alert('Conectando con la pasarela de pagos segura de Stripe...');
+            } catch (e) {
+                console.error(e);
+                alert('Error al iniciar el pago con tarjeta.');
+            }
+        }
+    </script>
+</body>
+</html>
